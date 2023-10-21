@@ -37,6 +37,13 @@ public class GameEngine {
 	private int timer = 45;
 
 	public GameEngine(String config){
+		load(config);
+	}
+
+	/**
+	 * Load objects for the game.
+	 */
+	public void load(String config) {
 		// Read the config here
 		ConfigReader.parse(config);
 
@@ -68,22 +75,13 @@ public class GameEngine {
 			gameObjects.add(enemy);
 			renderables.add(enemy);
 		}
-
 	}
 
 	/**
 	 * Change difficulty level
 	 */
 	public void reload(String config) {
-		// Read the config here
-		ConfigReader.parse(config);
-
-		// Get game width and height
-		gameWidth = ((Long)((JSONObject)
-				ConfigReader.getGameInfo().get("size")).get("x")).intValue();
-		gameHeight = ((Long)((JSONObject)
-				ConfigReader.getGameInfo().get("size")).get("y")).intValue();
-
+		// Remove old objects
 		for (Renderable object: renderables) {
 			while(object.isAlive()) {
 				object.takeDamage(1);
@@ -94,26 +92,8 @@ public class GameEngine {
 		pendingToRemoveGameObject.clear();
 		pendingToRemoveRenderable.clear();
 
-		//Get player info
-		this.player = new Player(ConfigReader.getPlayerInfo());
-		renderables.add(player);
-
-		Director director = new Director();
-		BunkerBuilder bunkerBuilder = new BunkerBuilder();
-		//Get Bunkers info
-		for(Object eachBunkerInfo:ConfigReader.getBunkersInfo()){
-			Bunker bunker = director.constructBunker(bunkerBuilder, (JSONObject) eachBunkerInfo);
-			gameObjects.add(bunker);
-			renderables.add(bunker);
-		}
-
-		EnemyBuilder enemyBuilder = new EnemyBuilder();
-		//Get Enemy info
-		for(Object eachEnemyInfo:ConfigReader.getEnemiesInfo()){
-			Enemy enemy = director.constructEnemy(this,enemyBuilder,(JSONObject)eachEnemyInfo);
-			gameObjects.add(enemy);
-			renderables.add(enemy);
-		}
+		// Load new objects
+		load(config);
 	}
 
 	/**
