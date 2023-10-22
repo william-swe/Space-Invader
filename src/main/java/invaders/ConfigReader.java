@@ -1,6 +1,6 @@
 package invaders;
 
-import invaders.levels.Level;
+import invaders.prototype.Level;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -9,7 +9,6 @@ import org.json.simple.parser.ParseException;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,8 +20,9 @@ public class ConfigReader {
     private static Map<String, Level> levelRegistry = new HashMap<>();
 
     public static void parse(String configPath){
-        Level level = levelRegistry.get(configPath);
-        if (level == null) {
+        Level loadedLevel = levelRegistry.get(configPath);
+        if (loadedLevel == null) {
+            // Parse and store data to a Level object (only need to parse the file once)
             JSONParser parser = new JSONParser();
             try {
                 JSONObject configObject = (JSONObject) parser.parse(new FileReader(configPath));
@@ -52,7 +52,8 @@ public class ConfigReader {
                 e.printStackTrace();
             }
         } else {
-            // Retrieve info from Level object, each info is a clone
+            // Retrieve info from Level object, each info is a clone of the original one
+            Level level = loadedLevel.clone();
             gameInfo = level.getGameInfo();
             playerInfo = level.getPlayerInfo();
             bunkersInfo = level.getBunkersInfo();

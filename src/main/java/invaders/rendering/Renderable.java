@@ -7,7 +7,7 @@ import javafx.scene.image.Image;
 /**
  * Represents something that can be rendered
  */
-public interface Renderable {
+public interface Renderable extends Cloneable{
 
     public Image getImage();
 

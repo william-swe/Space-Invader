@@ -1,12 +1,18 @@
 package invaders.gameobject;
 
 import invaders.engine.GameEngine;
+import invaders.factory.EnemyProjectile;
+import invaders.factory.Projectile;
 import invaders.physics.Collider;
 import invaders.physics.Vector2D;
 import invaders.rendering.Renderable;
 import invaders.state.BunkerState;
 import invaders.state.GreenState;
+import invaders.state.RedState;
+import invaders.state.YellowState;
 import javafx.scene.image.Image;
+
+import java.util.ArrayList;
 
 public class Bunker implements GameObject, Renderable {
     private Vector2D position;
@@ -16,6 +22,24 @@ public class Bunker implements GameObject, Renderable {
     private Image image;
     private BunkerState state = new GreenState(this);
 
+    public Bunker() {};
+
+    public Bunker(Bunker otherBunker) {
+        this.position = otherBunker.getPosition().clone();
+        this.width = otherBunker.getWidth();
+        this.height = otherBunker.getHeight();
+        this.lives = (int) otherBunker.getHealth();
+        this.image = new Image(otherBunker.getImage().getUrl(),
+                otherBunker.getImage().getWidth(),
+                otherBunker.getImage().getHeight(), true, true);
+        if (otherBunker.getState() instanceof GreenState) {
+            this.state = new GreenState(this);
+        } else if (otherBunker.getState() instanceof YellowState) {
+            this.state = new YellowState(this);
+        } else {
+            this.state = new RedState(this);
+        }
+    }
 
     @Override
     public void start() {}
@@ -68,7 +92,6 @@ public class Bunker implements GameObject, Renderable {
 	    return this.lives > 0;
 	}
 
-
     @Override
     public double getWidth() {
         return width;
@@ -105,5 +128,10 @@ public class Bunker implements GameObject, Renderable {
 
     public void setState(BunkerState state) {
         this.state = state;
+    }
+
+    @Override
+    public Bunker clone() {
+        return new Bunker(this);
     }
 }

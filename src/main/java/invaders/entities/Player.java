@@ -1,9 +1,11 @@
 package invaders.entities;
 
+import invaders.engine.GameEngine;
 import invaders.factory.PlayerProjectile;
 import invaders.factory.PlayerProjectileFactory;
 import invaders.factory.Projectile;
 import invaders.factory.ProjectileFactory;
+import invaders.gameobject.GameObject;
 import invaders.physics.Collider;
 import invaders.physics.Moveable;
 import invaders.physics.Vector2D;
@@ -15,18 +17,19 @@ import javafx.scene.image.Image;
 import org.json.simple.JSONObject;
 
 import java.io.File;
+import java.util.ArrayList;
 
-public class Player implements Moveable, Renderable {
+public class Player implements Moveable, Renderable, GameObject {
 
     private final Vector2D position;
     private double health;
     private double velocity;
-
     private final double width = 20;
     private final double height = 20;
     private final Image image;
     private ProjectileFactory playerProjectileFactory = new PlayerProjectileFactory();
-
+    private ArrayList<Projectile> playerProjectile;
+    private ArrayList<Projectile> pendingToDeletePlayerProjectile;
 
     public Player(JSONObject playerInfo){
         int x = ((Long)((JSONObject)(playerInfo.get("position"))).get("x")).intValue();
@@ -36,7 +39,23 @@ public class Player implements Moveable, Renderable {
         this.position = new Vector2D(x,y);
         this.health = ((Long) playerInfo.get("lives")).intValue();
         this.velocity = ((Long) playerInfo.get("speed")).intValue();
+        this.playerProjectile = new ArrayList<>();
+        this.pendingToDeletePlayerProjectile = new ArrayList<>();
+    }
 
+    public Player(Player otherPlayer) {
+        this.position = otherPlayer.getPosition().clone();
+        this.health = otherPlayer.getHealth();
+        this.velocity = otherPlayer.getVelocity();
+        this.image = new Image(otherPlayer.getImage().getUrl(),
+                otherPlayer.getImage().getWidth(),
+                otherPlayer.getImage().getHeight(), true, true);
+        this.playerProjectile = new ArrayList<>();
+        for (Projectile p: otherPlayer.getPlayerProjectile()) {
+            this.playerProjectile.add(((PlayerProjectile) p).clone());
+        }
+        // We don't need to clone pending as all old objects will be removed
+        this.pendingToDeletePlayerProjectile = new ArrayList<>();
     }
 
     @Override
@@ -75,7 +94,9 @@ public class Player implements Moveable, Renderable {
     }
 
     public Projectile shoot(){
-        return playerProjectileFactory.createProjectile(new Vector2D(this.position.getX() + 5 ,this.position.getY() - 10),new NormalProjectileStrategy(),null);
+        Projectile projectile = playerProjectileFactory.createProjectile(new Vector2D(this.position.getX() + 5 ,this.position.getY() - 10),new NormalProjectileStrategy(),null);
+        playerProjectile.add(projectile);
+        return projectile;
     }
 
     @Override
@@ -108,4 +129,40 @@ public class Player implements Moveable, Renderable {
         return "Player";
     }
 
+    @Override
+    public void start() {}
+
+    @Override
+    public void update(GameEngine engine) {
+        pendingToDeletePlayerProjectile.clear();
+        for(Projectile p : playerProjectile){
+            if(!p.isAlive()){
+                engine.getPendingToRemoveGameObject().add(p);
+                engine.getPendingToRemoveRenderable().add(p);
+                pendingToDeletePlayerProjectile.add(p);
+            }
+        }
+
+        for(Projectile p: pendingToDeletePlayerProjectile){
+            playerProjectile.remove(p);
+        }
+
+        if (!this.isAlive()) {
+            engine.getPendingToRemoveGameObject().add(this);
+            engine.getPendingToRemoveRenderable().add(this);
+        }
+    }
+
+    public ArrayList<Projectile> getPlayerProjectile() {
+        return playerProjectile;
+    }
+
+    @Override
+    public Player clone() {
+        return new Player(this);
+    }
+
+    public double getVelocity() {
+        return velocity;
+    }
 }

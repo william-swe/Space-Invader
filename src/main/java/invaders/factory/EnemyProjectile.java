@@ -14,6 +14,14 @@ public class EnemyProjectile extends Projectile{
         this.strategy = strategy;
     }
 
+    public EnemyProjectile(EnemyProjectile otherProjectile) {
+        super(otherProjectile.getPosition().clone(),
+                new Image(otherProjectile.getImage().getUrl(),
+                        otherProjectile.getImage().getWidth(),
+                        otherProjectile.getImage().getHeight(), true, true));
+        this.strategy = otherProjectile.strategy;
+    }
+
     @Override
     public void update(GameEngine model) {
         strategy.update(this);
@@ -26,5 +34,14 @@ public class EnemyProjectile extends Projectile{
     @Override
     public String getRenderableObjectName() {
         return "EnemyProjectile";
+    }
+
+    public ProjectileStrategy getStrategy() {
+        return strategy;
+    }
+
+    @Override
+    public EnemyProjectile clone() {
+        return new EnemyProjectile(this);
     }
 }

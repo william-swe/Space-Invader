@@ -1,5 +1,6 @@
 package invaders.engine;
 
+import invaders.memento.GameEngineCareTaker;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.media.Media;
@@ -16,8 +17,8 @@ class KeyboardInputHandler {
     private boolean left = false;
     private boolean right = false;
     private Set<KeyCode> pressedKeys = new HashSet<>();
-
     private Map<String, MediaPlayer> sounds = new HashMap<>();
+    GameEngineCareTaker gameEngineCareTaker;
 
     KeyboardInputHandler(GameEngine model) {
         this.model = model;
@@ -29,6 +30,8 @@ class KeyboardInputHandler {
         Media sound = new Media(jumpURL);
         MediaPlayer mediaPlayer = new MediaPlayer(sound);
         sounds.put("shoot", mediaPlayer);
+
+        gameEngineCareTaker = new GameEngineCareTaker();
     }
 
     void handlePressed(KeyEvent keyEvent) {
@@ -38,11 +41,39 @@ class KeyboardInputHandler {
         pressedKeys.add(keyEvent.getCode());
 
         if (keyEvent.getCode().equals(KeyCode.SPACE)) {
+            // Save and shoot a projectile
+            gameEngineCareTaker.setMemento(model.saveState());
             if (model.shootPressed()) {
                 MediaPlayer shoot = sounds.get("shoot");
                 shoot.stop();
                 shoot.play();
             }
+        }
+
+        if (keyEvent.getCode().equals(KeyCode.R)) {
+            // Undo
+            model.undo(gameEngineCareTaker.getMemento());
+            gameEngineCareTaker.setMemento(null);
+        }
+
+        if (keyEvent.getCode().equals(KeyCode.A)) {
+            // Remove all aliens slow projectiles
+            model.removeAllSlowProjectiles();
+        }
+
+        if (keyEvent.getCode().equals(KeyCode.S)) {
+            // Remove all aliens fast projectiles
+            model.removeAllFastProjectiles();
+        }
+
+        if (keyEvent.getCode().equals(KeyCode.D)) {
+            // Remove all slow aliens
+            model.removeAllSlowAliens();
+        }
+
+        if (keyEvent.getCode().equals(KeyCode.F)) {
+            // Remove all fast aliens
+            model.removeAllFastAliens();
         }
 
         if (keyEvent.getCode().equals(KeyCode.LEFT)) {
@@ -53,14 +84,16 @@ class KeyboardInputHandler {
         }
 
         if (keyEvent.getCode().equals(KeyCode.DIGIT1)) {
-            System.out.println("LEVEL 1!");
+            System.out.println("Switch to LEVEL 1!");
             model.reload("src/main/resources/config_easy.json");
         }
         if (keyEvent.getCode().equals(KeyCode.DIGIT2)) {
-            System.out.println("LEVEL 2!");
+            System.out.println("Switch to LEVEL 2!");
+            model.reload("src/main/resources/config_medium.json");
         }
         if (keyEvent.getCode().equals(KeyCode.DIGIT3)) {
-            System.out.println("LEVEL 3!");
+            System.out.println("Switch to LEVEL 3!");
+            model.reload("src/main/resources/config_hard.json");
         }
 
         if (left) {

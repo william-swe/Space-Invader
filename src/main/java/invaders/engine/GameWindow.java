@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import invaders.ConfigReader;
 import invaders.entities.EntityViewImpl;
 import invaders.entities.SpaceBackground;
+import invaders.observer.Clock;
+import invaders.observer.Score;
 import javafx.scene.control.Alert;
 import javafx.util.Duration;
 
@@ -38,6 +40,11 @@ public class GameWindow {
         pane = new Pane();
         scene = new Scene(pane, width, height);
         this.background = new SpaceBackground(model, pane);
+
+        Clock clock = new Clock(model, 10, 5);
+        this.pane.getChildren().add(clock);
+        Score score = new Score(model, width - 35, 5);
+        this.pane.getChildren().add(score);
 
         KeyboardInputHandler keyboardInputHandler = new KeyboardInputHandler(this.model);
 

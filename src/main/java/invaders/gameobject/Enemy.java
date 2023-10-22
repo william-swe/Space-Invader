@@ -1,6 +1,7 @@
 package invaders.gameobject;
 
 import invaders.engine.GameEngine;
+import invaders.factory.EnemyProjectile;
 import invaders.factory.EnemyProjectileFactory;
 import invaders.factory.Projectile;
 import invaders.factory.ProjectileFactory;
@@ -19,7 +20,6 @@ public class Enemy implements GameObject, Renderable {
     private int lives = 1;
     private Image image;
     private int xVel = -1;
-
     private ArrayList<Projectile> enemyProjectile;
     private ArrayList<Projectile> pendingToDeleteEnemyProjectile;
     private ProjectileStrategy projectileStrategy;
@@ -32,6 +32,26 @@ public class Enemy implements GameObject, Renderable {
         this.projectileFactory = new EnemyProjectileFactory();
         this.enemyProjectile = new ArrayList<>();
         this.pendingToDeleteEnemyProjectile = new ArrayList<>();
+    }
+
+    public Enemy(Enemy otherEnemy) {
+        this.position = otherEnemy.getPosition().clone();
+        this.lives = (int) otherEnemy.getHealth();
+        this.image = new Image(otherEnemy.getImage().getUrl(),
+                otherEnemy.getImage().getWidth(),
+                otherEnemy.getImage().getHeight(), true, true);
+        this.xVel = otherEnemy.getxVel();
+        this.enemyProjectile = new ArrayList<>();
+        for (Projectile p: otherEnemy.getEnemyProjectile()) {
+            this.enemyProjectile.add(((EnemyProjectile) p).clone());
+        }
+        // We don't need to clone pending as all old objects will be removed
+        this.pendingToDeleteEnemyProjectile = new ArrayList<>();
+        this.projectileStrategy = otherEnemy.getProjectileStrategy();
+        this.projectileFactory = new EnemyProjectileFactory();
+        this.projectileImage = new Image(otherEnemy.getProjectileImage().getUrl(),
+                otherEnemy.getImage().getWidth(),
+                otherEnemy.getImage().getHeight(), true, true);
     }
 
     @Override
@@ -75,6 +95,10 @@ public class Enemy implements GameObject, Renderable {
         /*
         Logic TBD
          */
+        if (!this.isAlive()) {
+            engine.getPendingToRemoveGameObject().add(this);
+            engine.getPendingToRemoveRenderable().add(this);
+        }
 
     }
 
@@ -143,4 +167,24 @@ public class Enemy implements GameObject, Renderable {
         this.projectileStrategy = projectileStrategy;
     }
 
+    public ProjectileStrategy getProjectileStrategy() {
+        return projectileStrategy;
+    }
+
+    public int getxVel() {
+        return xVel;
+    }
+
+    public ArrayList<Projectile> getEnemyProjectile() {
+        return enemyProjectile;
+    }
+
+    public Image getProjectileImage() {
+        return projectileImage;
+    }
+
+    @Override
+    public Enemy clone() {
+        return new Enemy(this);
+    }
 }
