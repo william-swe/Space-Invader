@@ -26,7 +26,7 @@ import org.json.simple.JSONObject;
 /**
  * This class manages the main loop and logic of the game
  */
-public class GameEngine implements Subject, Cloneable {
+public class GameEngine implements Subject {
 	private List<GameObject> gameObjects = new ArrayList<>(); // A list of game objects that gets updated each frame
 	private List<GameObject> pendingToAddGameObject = new ArrayList<>();
 	private List<GameObject> pendingToRemoveGameObject = new ArrayList<>();
@@ -45,59 +45,6 @@ public class GameEngine implements Subject, Cloneable {
 
 	public GameEngine(String config){
 		load(config);
-	}
-
-	/**
-	 * Copy Constructor.
-	 * @param otherEngine: Engine to be copied.
-	 */
-	public GameEngine(GameEngine otherEngine) {
-		// Copy player
-		this.player = otherEngine.getPlayer().clone();
-		this.renderables.add(this.player);
-		this.gameObjects.add(this.player);
-
-		// Copy configurations
-		this.left = otherEngine.isLeft();
-		this.right = otherEngine.isRight();
-		this.gameWidth = otherEngine.getGameWidth();
-		this.gameHeight = otherEngine.getGameHeight();
-		this.timer = otherEngine.getTimer();
-
-		// Copy player's projectile
-		for (Projectile p: this.player.getPlayerProjectile()) {
-			this.renderables.add(p);
-			this.gameObjects.add(p);
-		}
-
-		// Copy enemy, enemy's projectiles and bunkers
-		for (Renderable ro: otherEngine.getRenderables()) {
-			if (ro instanceof Enemy) {
-				Enemy enemy = ((Enemy) ro).clone();
-				this.renderables.add(enemy);
-				this.gameObjects.add(enemy);
-				for (Projectile ep: enemy.getEnemyProjectile()) {
-					this.renderables.add(ep);
-					this.gameObjects.add(ep);
-				}
-			} else if (ro instanceof Bunker) {
-				Bunker bunker = ((Bunker) ro).clone();
-				this.renderables.add(bunker);
-				this.gameObjects.add(bunker);
-			}
-		}
-
-		// Copy observers
-		this.observers = otherEngine.getObservers();
-
-		Clock clock = otherEngine.getClock();
-		ClockMemento clockMemento = new ClockMemento(clock.getMinutes(), clock.getSeconds(),
-		clock.getFrame(), clock.isTicking());
-		this.clockCareTaker.setMemento(clockMemento);
-
-		Score score = otherEngine.getScore();
-		ScoreMemento scoreMemento = new ScoreMemento(score.getScore());
-		this.scoreCareTaker.setMemento(scoreMemento);
 	}
 
 	/**
@@ -348,8 +295,58 @@ public class GameEngine implements Subject, Cloneable {
 	 * @return a memento object that contains saved data.
 	 */
 	public GameEngineMemento saveState() {
-		System.out.println("Save successfully!");
-		return new GameEngineMemento(this.clone());
+		if (player.isAlive()) {
+			// Copy player
+			Player player = this.getPlayer().clone();
+			List<Renderable> renderables = new ArrayList<>();
+			List<GameObject> gameObjects = new ArrayList<>();
+			renderables.add(player);
+			gameObjects.add(player);
+
+			// Copy configurations
+			int gameWidth = this.getGameWidth();
+			int gameHeight = this.getGameHeight();
+			int timer = this.getTimer();
+
+			// Copy player's projectile
+			for (Projectile p: player.getPlayerProjectile()) {
+				renderables.add(p);
+				gameObjects.add(p);
+			}
+
+			// Copy enemy, enemy's projectiles and bunkers
+			for (Renderable ro: this.getRenderables()) {
+				if (ro instanceof Enemy) {
+					Enemy enemy = ((Enemy) ro).clone();
+					renderables.add(enemy);
+					gameObjects.add(enemy);
+					for (Projectile ep: enemy.getEnemyProjectile()) {
+						renderables.add(ep);
+						gameObjects.add(ep);
+					}
+				} else if (ro instanceof Bunker) {
+					Bunker bunker = ((Bunker) ro).clone();
+					renderables.add(bunker);
+					gameObjects.add(bunker);
+				}
+			}
+
+			// Copy observers
+			List<Observer> observers = this.getObservers();
+
+			Clock clock = this.getClock();
+			ClockMemento clockMemento = new ClockMemento(clock.getMinutes(), clock.getSeconds(),
+					clock.getFrame(), clock.isTicking());
+			this.clockCareTaker.setMemento(clockMemento);
+
+			Score score = this.getScore();
+			ScoreMemento scoreMemento = new ScoreMemento(score.getScore());
+			this.scoreCareTaker.setMemento(scoreMemento);
+
+			System.out.println("Save successfully!");
+			return new GameEngineMemento(renderables, gameObjects, player, gameWidth, gameHeight, observers, timer);
+		}
+		return null;
 	}
 
 	/**
@@ -357,7 +354,7 @@ public class GameEngine implements Subject, Cloneable {
 	 * @param gameEngineMemento: A memento object that contains saved data of the last state.
 	 */
 	public void undo(GameEngineMemento gameEngineMemento) {
-		if (gameEngineMemento != null) {
+		if (gameEngineMemento != null && player.isAlive()) {
 			// Remove old objects
 			for (Renderable ro: renderables) {
 				while (ro.isAlive()) {
@@ -365,30 +362,29 @@ public class GameEngine implements Subject, Cloneable {
 				}
 			}
 
-			GameEngine gameEngine = gameEngineMemento.getData();
 			// Add old objects
-			this.renderables.addAll(gameEngine.getRenderables());
-			this.gameObjects.addAll(gameEngine.getGameObjects());
+			this.renderables.addAll(gameEngineMemento.getRenderables());
+			this.gameObjects.addAll(gameEngineMemento.getGameObjects());
 
 			// Set up player and configurations
-			this.player = gameEngine.getPlayer();
-			this.gameWidth = gameEngine.getGameWidth();
-			this.gameHeight = gameEngine.getGameHeight();
+			this.player = gameEngineMemento.getPlayer();
+			this.gameWidth = gameEngineMemento.getGameWidth();
+			this.gameHeight = gameEngineMemento.getGameHeight();
 			this.right = false;
 			this.left = false;
-			this.observers = gameEngine.getObservers();
-			this.timer = gameEngine.getTimer();
+			this.observers = gameEngineMemento.getObservers();
+			this.timer = gameEngineMemento.getTimer();
 
 			// Set up observers
 			Clock clock = this.getClock();
-			ClockMemento clockMemento = gameEngine.getClockCareTaker().getMemento();
+			ClockMemento clockMemento = this.getClockCareTaker().getMemento();
 			clock.setMinutes(clockMemento.getMinutes());
 			clock.setSeconds(clockMemento.getSeconds());
 			clock.setFrame(clockMemento.getFrame());
 			clock.setTicking(clockMemento.isTicking());
 
 			Score score = this.getScore();
-			ScoreMemento scoreMemento = gameEngine.getScoreCareTaker().getMemento();
+			ScoreMemento scoreMemento = this.getScoreCareTaker().getMemento();
 			score.setScore(scoreMemento.getScore());
 			System.out.println("Undo successfully!");
 		} else {
@@ -438,15 +434,6 @@ public class GameEngine implements Subject, Cloneable {
 		return null;
 	}
 
-	/**
-	 * Get a clone of GameEngine.
-	 * @return a deep copy of GameEngine.
-	 */
-	@Override
-	public GameEngine clone() {
-		return new GameEngine(this);
-	}
-
 	public ClockCareTaker getClockCareTaker() {
 		return clockCareTaker;
 	}
@@ -459,15 +446,17 @@ public class GameEngine implements Subject, Cloneable {
 	 * Remove all slow projectiles.
 	 */
 	public void removeAllSlowProjectiles() {
-		Score score = this.getScore();
-		for (Renderable ro: renderables) {
-			if (ro instanceof EnemyProjectile ep &&
-					ep.getStrategy() instanceof SlowProjectileStrategy &&
-			ep.isAlive()) {
-				while (ep.isAlive()) {
-					ep.takeDamage(1);
+		if (player.isAlive()) {
+			Score score = this.getScore();
+			for (Renderable ro: renderables) {
+				if (ro instanceof EnemyProjectile ep &&
+						ep.getStrategy() instanceof SlowProjectileStrategy &&
+						ep.isAlive()) {
+					while (ep.isAlive()) {
+						ep.takeDamage(1);
+					}
+					score.setScore(score.getScore() + 1);
 				}
-				score.setScore(score.getScore() + 1);
 			}
 		}
 	}
@@ -476,15 +465,17 @@ public class GameEngine implements Subject, Cloneable {
 	 * Remove all fast projectiles.
 	 */
 	public void removeAllFastProjectiles() {
-		Score score = this.getScore();
-		for (Renderable ro: renderables) {
-			if (ro instanceof EnemyProjectile ep &&
-					ep.getStrategy() instanceof FastProjectileStrategy &&
-					ep.isAlive()) {
-				while (ep.isAlive()) {
-					ep.takeDamage(1);
+		if (player.isAlive()) {
+			Score score = this.getScore();
+			for (Renderable ro: renderables) {
+				if (ro instanceof EnemyProjectile ep &&
+						ep.getStrategy() instanceof FastProjectileStrategy &&
+						ep.isAlive()) {
+					while (ep.isAlive()) {
+						ep.takeDamage(1);
+					}
+					score.setScore(score.getScore() + 2);
 				}
-				score.setScore(score.getScore() + 2);
 			}
 		}
 	}
@@ -493,15 +484,17 @@ public class GameEngine implements Subject, Cloneable {
 	 * Remove all slow aliens.
 	 */
 	public void removeAllSlowAliens() {
-		Score score = this.getScore();
-		for (Renderable ro: renderables) {
-			if (ro instanceof Enemy enemy &&
-					enemy.getProjectileStrategy() instanceof SlowProjectileStrategy &&
-					enemy.isAlive()) {
-				while (enemy.isAlive()) {
-					enemy.takeDamage(1);
+		if (player.isAlive()) {
+			Score score = this.getScore();
+			for (Renderable ro: renderables) {
+				if (ro instanceof Enemy enemy &&
+						enemy.getProjectileStrategy() instanceof SlowProjectileStrategy &&
+						enemy.isAlive()) {
+					while (enemy.isAlive()) {
+						enemy.takeDamage(1);
+					}
+					score.setScore(score.getScore() + 3);
 				}
-				score.setScore(score.getScore() + 3);
 			}
 		}
 	}
@@ -510,15 +503,17 @@ public class GameEngine implements Subject, Cloneable {
 	 * Remove all fast aliens.
 	 */
 	public void removeAllFastAliens() {
-		Score score = this.getScore();
-		for (Renderable ro: renderables) {
-			if (ro instanceof Enemy enemy &&
-					enemy.getProjectileStrategy() instanceof FastProjectileStrategy &&
-					enemy.isAlive()) {
-				while (enemy.isAlive()) {
-					enemy.takeDamage(1);
+		if (player.isAlive()) {
+			Score score = this.getScore();
+			for (Renderable ro: renderables) {
+				if (ro instanceof Enemy enemy &&
+						enemy.getProjectileStrategy() instanceof FastProjectileStrategy &&
+						enemy.isAlive()) {
+					while (enemy.isAlive()) {
+						enemy.takeDamage(1);
+					}
+					score.setScore(score.getScore() + 4);
 				}
-				score.setScore(score.getScore() + 4);
 			}
 		}
 	}
