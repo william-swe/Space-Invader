@@ -1,6 +1,8 @@
 package invaders.engine;
 
+import invaders.memento.CareTakerImp;
 import invaders.memento.GameEngineCareTaker;
+import invaders.memento.GameEngineMemento;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.media.Media;
@@ -18,7 +20,7 @@ class KeyboardInputHandler {
     private boolean right = false;
     private Set<KeyCode> pressedKeys = new HashSet<>();
     private Map<String, MediaPlayer> sounds = new HashMap<>();
-    GameEngineCareTaker gameEngineCareTaker;
+    CareTakerImp gameEngineCareTaker;
 
     KeyboardInputHandler(GameEngine model) {
         this.model = model;
@@ -31,7 +33,7 @@ class KeyboardInputHandler {
         MediaPlayer mediaPlayer = new MediaPlayer(sound);
         sounds.put("shoot", mediaPlayer);
 
-        gameEngineCareTaker = new GameEngineCareTaker();
+        gameEngineCareTaker = new CareTakerImp();
     }
 
     void handlePressed(KeyEvent keyEvent) {
@@ -52,7 +54,7 @@ class KeyboardInputHandler {
 
         if (keyEvent.getCode().equals(KeyCode.R)) {
             // Undo
-            model.undo(gameEngineCareTaker.getMemento());
+            model.undo((GameEngineMemento) gameEngineCareTaker.getMemento());
             gameEngineCareTaker.setMemento(null);
         }
 

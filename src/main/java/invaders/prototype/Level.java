@@ -9,6 +9,13 @@ public class Level implements Cloneable{
     private final JSONArray bunkersInfo;
     private final JSONArray enemiesInfo;
 
+    /**
+     * Level constructor.
+     * @param gameInfo: gameInfo JSONObject.
+     * @param playerInfo: playerInfo JSONObject.
+     * @param bunkersInfo: bunkersInfo JSONObject.
+     * @param enemiesInfo: enemiesInfo JSONObject.
+     */
     public Level(JSONObject gameInfo, JSONObject playerInfo,
                  JSONArray bunkersInfo, JSONArray enemiesInfo) {
         this.gameInfo = gameInfo;
@@ -17,22 +24,42 @@ public class Level implements Cloneable{
         this.enemiesInfo = enemiesInfo;
     }
 
+    /**
+     * Returns the gameInfo object.
+     * @return the gameInfo object.
+     */
     public JSONObject getGameInfo() {
         return gameInfo;
     }
 
+    /**
+     * Returns the playerInfo object.
+     * @return the playerInfo object.
+     */
     public JSONObject getPlayerInfo() {
         return playerInfo;
     }
 
+    /**
+     * Returns the bunkersInfo object.
+     * @return the bunkersInfo object.
+     */
     public JSONArray getBunkersInfo() {
         return bunkersInfo;
     }
 
+    /**
+     * Returns the enemiesInfo object.
+     * @return the enemiesInfo object.
+     */
     public JSONArray getEnemiesInfo() {
         return enemiesInfo;
     }
 
+    /**
+     * The method returns a deep copy of the object.
+     * @return a deep copy of the object.
+     */
     @Override
     public Level clone() {
         return new Level(copyGameInfo(), copyPlayerInfo(),

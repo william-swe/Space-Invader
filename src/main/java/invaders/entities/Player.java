@@ -18,6 +18,7 @@ import org.json.simple.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 public class Player implements Moveable, Renderable, GameObject {
 
@@ -28,8 +29,8 @@ public class Player implements Moveable, Renderable, GameObject {
     private final double height = 20;
     private final Image image;
     private ProjectileFactory playerProjectileFactory = new PlayerProjectileFactory();
-    private ArrayList<Projectile> playerProjectile;
-    private ArrayList<Projectile> pendingToDeletePlayerProjectile;
+    private List<Projectile> playerProjectile;
+    private List<Projectile> pendingToDeletePlayerProjectile;
 
     public Player(JSONObject playerInfo){
         int x = ((Long)((JSONObject)(playerInfo.get("position"))).get("x")).intValue();
@@ -153,7 +154,7 @@ public class Player implements Moveable, Renderable, GameObject {
         }
     }
 
-    public ArrayList<Projectile> getPlayerProjectile() {
+    public List<Projectile> getPlayerProjectile() {
         return playerProjectile;
     }
 

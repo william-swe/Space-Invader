@@ -37,6 +37,6 @@ Observer is the observer interface. Clock and Score are the concrete observers.
 
 - Memento:
 
-GameEngine is the Originator.
+GameEngine, Clock and Score are the Originators.
 There are three Memento classes: GameEngineMemento, ClockMemento and ScoreMemento.
 There are three corresponding CareTaker classes: GameEngineCareTaker, ClockCareTaker and ScoreCareTaker.

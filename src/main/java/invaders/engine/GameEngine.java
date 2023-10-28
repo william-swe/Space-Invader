@@ -14,10 +14,7 @@ import invaders.gameobject.Enemy;
 import invaders.gameobject.GameObject;
 import invaders.entities.Player;
 import invaders.memento.*;
-import invaders.observer.Clock;
-import invaders.observer.Observer;
-import invaders.observer.Score;
-import invaders.observer.Subject;
+import invaders.observer.*;
 import invaders.rendering.Renderable;
 import invaders.strategy.FastProjectileStrategy;
 import invaders.strategy.SlowProjectileStrategy;
@@ -26,7 +23,7 @@ import org.json.simple.JSONObject;
 /**
  * This class manages the main loop and logic of the game
  */
-public class GameEngine implements Subject {
+public class GameEngine implements Subject, Originator {
 	private List<GameObject> gameObjects = new ArrayList<>(); // A list of game objects that gets updated each frame
 	private List<GameObject> pendingToAddGameObject = new ArrayList<>();
 	private List<GameObject> pendingToRemoveGameObject = new ArrayList<>();
@@ -40,8 +37,8 @@ public class GameEngine implements Subject {
 	private int gameHeight;
 	private int timer = 45;
 	private List<Observer> observers = new ArrayList<>();
-	private ClockCareTaker clockCareTaker = new ClockCareTaker();
-	private ScoreCareTaker scoreCareTaker = new ScoreCareTaker();
+	private CareTakerImp clockCareTaker = new CareTakerImp();
+	private CareTakerImp scoreCareTaker = new CareTakerImp();
 
 	public GameEngine(String config){
 		load(config);
@@ -294,6 +291,7 @@ public class GameEngine implements Subject {
 	 * Save the current state of the game.
 	 * @return a memento object that contains saved data.
 	 */
+	@Override
 	public GameEngineMemento saveState() {
 		if (player.isAlive()) {
 			// Copy player
@@ -335,26 +333,26 @@ public class GameEngine implements Subject {
 			List<Observer> observers = this.getObservers();
 
 			Clock clock = this.getClock();
-			ClockMemento clockMemento = new ClockMemento(clock.getMinutes(), clock.getSeconds(),
-					clock.getFrame(), clock.isTicking());
-			this.clockCareTaker.setMemento(clockMemento);
+			this.clockCareTaker.setMemento(clock.saveState());
 
 			Score score = this.getScore();
-			ScoreMemento scoreMemento = new ScoreMemento(score.getScore());
-			this.scoreCareTaker.setMemento(scoreMemento);
+			this.scoreCareTaker.setMemento(score.saveState());
 
 			System.out.println("Save successfully!");
-			return new GameEngineMemento(renderables, gameObjects, player, gameWidth, gameHeight, observers, timer);
+			return new GameEngineMemento(renderables, gameObjects, player,
+					gameWidth, gameHeight, observers, timer);
 		}
 		return null;
 	}
 
 	/**
 	 * Undo the last shot.
-	 * @param gameEngineMemento: A memento object that contains saved data of the last state.
+	 * @param memento: A memento object that contains saved data of the last state.
 	 */
-	public void undo(GameEngineMemento gameEngineMemento) {
-		if (gameEngineMemento != null && player.isAlive()) {
+	@Override
+	public void undo(Memento memento) {
+		if (memento != null && player.isAlive()) {
+			GameEngineMemento gameEngineMemento = (GameEngineMemento) memento;
 			// Remove old objects
 			for (Renderable ro: renderables) {
 				while (ro.isAlive()) {
@@ -377,15 +375,12 @@ public class GameEngine implements Subject {
 
 			// Set up observers
 			Clock clock = this.getClock();
-			ClockMemento clockMemento = this.getClockCareTaker().getMemento();
-			clock.setMinutes(clockMemento.getMinutes());
-			clock.setSeconds(clockMemento.getSeconds());
-			clock.setFrame(clockMemento.getFrame());
-			clock.setTicking(clockMemento.isTicking());
+			Memento clockMemento = this.getClockCareTaker().getMemento();
+			clock.undo(clockMemento);
 
 			Score score = this.getScore();
-			ScoreMemento scoreMemento = this.getScoreCareTaker().getMemento();
-			score.setScore(scoreMemento.getScore());
+			Memento scoreMemento = this.getScoreCareTaker().getMemento();
+			score.undo(scoreMemento);
 			System.out.println("Undo successfully!");
 		} else {
 			System.out.println("There's nothing to undo!");
@@ -434,11 +429,11 @@ public class GameEngine implements Subject {
 		return null;
 	}
 
-	public ClockCareTaker getClockCareTaker() {
+	public CareTakerImp getClockCareTaker() {
 		return clockCareTaker;
 	}
 
-	public ScoreCareTaker getScoreCareTaker() {
+	public CareTakerImp getScoreCareTaker() {
 		return scoreCareTaker;
 	}
 
