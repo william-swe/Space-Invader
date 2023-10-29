@@ -1,10 +1,8 @@
 package invaders.builder;
 
-import invaders.ConfigReader;
 import invaders.engine.GameEngine;
 import invaders.gameobject.Bunker;
 import invaders.gameobject.Enemy;
-import invaders.gameobject.GameObject;
 import invaders.physics.Vector2D;
 import javafx.scene.image.Image;
 import org.json.simple.JSONObject;

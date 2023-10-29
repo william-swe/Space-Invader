@@ -2,22 +2,17 @@ package invaders.observer;
 
 import invaders.engine.GameEngine;
 import invaders.factory.EnemyProjectile;
-import invaders.factory.PlayerProjectile;
 import invaders.factory.Projectile;
 import invaders.gameobject.Enemy;
-import invaders.memento.ClockMemento;
 import invaders.memento.Memento;
+import invaders.memento.Originator;
 import invaders.memento.ScoreMemento;
 import invaders.rendering.Renderable;
 import invaders.strategy.FastProjectileStrategy;
-import invaders.strategy.NormalProjectileStrategy;
 import invaders.strategy.SlowProjectileStrategy;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class Score extends Label implements Observer, Originator {
     private Subject subject;

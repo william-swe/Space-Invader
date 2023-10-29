@@ -5,13 +5,11 @@ import invaders.factory.EnemyProjectile;
 import invaders.factory.EnemyProjectileFactory;
 import invaders.factory.Projectile;
 import invaders.factory.ProjectileFactory;
-import invaders.physics.Collider;
 import invaders.physics.Vector2D;
 import invaders.rendering.Renderable;
 import invaders.strategy.ProjectileStrategy;
 import javafx.scene.image.Image;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
 

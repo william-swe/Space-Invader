@@ -1,4 +1,4 @@
-package invaders.observer;
+package invaders.memento;
 
 import invaders.memento.Memento;
 

@@ -1,7 +1,6 @@
 package invaders.factory;
 
 import invaders.engine.GameEngine;
-import invaders.physics.Collider;
 import invaders.physics.Vector2D;
 import invaders.strategy.ProjectileStrategy;
 import javafx.scene.image.Image;

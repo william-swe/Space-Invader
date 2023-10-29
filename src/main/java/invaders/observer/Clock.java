@@ -3,6 +3,7 @@ package invaders.observer;
 import invaders.engine.GameEngine;
 import invaders.memento.ClockMemento;
 import invaders.memento.Memento;
+import invaders.memento.Originator;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
@@ -87,27 +88,11 @@ public class Clock extends Label implements Observer, Originator {
     }
 
     /**
-     * Set the minutes for the clock.
-     * @param minutes: New minutes.
-     */
-    public void setMinutes(int minutes) {
-        this.minutes = minutes;
-    }
-
-    /**
      * Returns the seconds of the clock.
      * @return the seconds
      */
     public int getSeconds() {
         return seconds;
-    }
-
-    /**
-     * Set the seconds for the clock.
-     * @param seconds: New seconds.
-     */
-    public void setSeconds(int seconds) {
-        this.seconds = seconds;
     }
 
     /**
@@ -119,27 +104,11 @@ public class Clock extends Label implements Observer, Originator {
     }
 
     /**
-     * Sets the frames for the clock.
-     * @param frame: New frames
-     */
-    public void setFrame(int frame) {
-        this.frame = frame;
-    }
-
-    /**
      * Returns true if the clock is ticking. Otherwise, false.
      * @return the status of the clock.
      */
     public boolean isTicking() {
         return ticking;
-    }
-
-    /**
-     * Sets the status of the clock.
-     * @param ticking: New status.
-     */
-    public void setTicking(boolean ticking) {
-        this.ticking = ticking;
     }
 
     /**

@@ -6,10 +6,8 @@ import invaders.factory.PlayerProjectileFactory;
 import invaders.factory.Projectile;
 import invaders.factory.ProjectileFactory;
 import invaders.gameobject.GameObject;
-import invaders.physics.Collider;
 import invaders.physics.Moveable;
 import invaders.physics.Vector2D;
-import invaders.rendering.Animator;
 import invaders.rendering.Renderable;
 
 import invaders.strategy.NormalProjectileStrategy;

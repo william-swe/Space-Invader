@@ -1,6 +1,5 @@
 package invaders.rendering;
 
-import invaders.physics.Collider;
 import invaders.physics.Vector2D;
 import javafx.scene.image.Image;
 

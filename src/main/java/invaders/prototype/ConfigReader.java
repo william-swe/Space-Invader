@@ -1,4 +1,4 @@
-package invaders;
+package invaders.prototype;
 
 import invaders.prototype.Level;
 import org.json.simple.JSONArray;
@@ -17,10 +17,10 @@ public class ConfigReader {
     private static JSONObject playerInfo;
     private static JSONArray bunkersInfo;
     private static JSONArray enemiesInfo;
-    private static Map<String, Level> levelRegistry = new HashMap<>();
+    private static Map<String, Cloneable> levelRegistry = new HashMap<>();
 
     public static void parse(String configPath){
-        Level loadedLevel = levelRegistry.get(configPath);
+        Cloneable loadedLevel = levelRegistry.get(configPath);
         if (loadedLevel == null) {
             // Parse and store data to a Level object (only need to parse the file once)
             JSONParser parser = new JSONParser();
@@ -53,7 +53,7 @@ public class ConfigReader {
             }
         } else {
             // Retrieve info from Level object, each info is a clone of the original one
-            Level level = loadedLevel.clone();
+            Level level = ((Level) loadedLevel).clone();
             gameInfo = level.getGameInfo();
             playerInfo = level.getPlayerInfo();
             bunkersInfo = level.getBunkersInfo();

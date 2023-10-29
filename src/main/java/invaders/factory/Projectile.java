@@ -1,7 +1,6 @@
 package invaders.factory;
 
 import invaders.gameobject.GameObject;
-import invaders.physics.Collider;
 import invaders.physics.Vector2D;
 import invaders.rendering.Renderable;
 import javafx.scene.image.Image;

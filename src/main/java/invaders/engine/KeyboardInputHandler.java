@@ -1,7 +1,7 @@
 package invaders.engine;
 
+import invaders.memento.CareTaker;
 import invaders.memento.CareTakerImp;
-import invaders.memento.GameEngineCareTaker;
 import invaders.memento.GameEngineMemento;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -20,7 +20,7 @@ class KeyboardInputHandler {
     private boolean right = false;
     private Set<KeyCode> pressedKeys = new HashSet<>();
     private Map<String, MediaPlayer> sounds = new HashMap<>();
-    CareTakerImp gameEngineCareTaker;
+    private CareTaker gameEngineCareTaker;
 
     KeyboardInputHandler(GameEngine model) {
         this.model = model;

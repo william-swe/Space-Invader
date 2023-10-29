@@ -1,9 +1,6 @@
 package invaders.gameobject;
 
 import invaders.engine.GameEngine;
-import invaders.factory.EnemyProjectile;
-import invaders.factory.Projectile;
-import invaders.physics.Collider;
 import invaders.physics.Vector2D;
 import invaders.rendering.Renderable;
 import invaders.state.BunkerState;
@@ -11,8 +8,6 @@ import invaders.state.GreenState;
 import invaders.state.RedState;
 import invaders.state.YellowState;
 import javafx.scene.image.Image;
-
-import java.util.ArrayList;
 
 public class Bunker implements GameObject, Renderable {
     private Vector2D position;

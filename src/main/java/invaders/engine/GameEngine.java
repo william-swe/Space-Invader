@@ -3,7 +3,7 @@ package invaders.engine;
 import java.util.ArrayList;
 import java.util.List;
 
-import invaders.ConfigReader;
+import invaders.prototype.ConfigReader;
 import invaders.builder.BunkerBuilder;
 import invaders.builder.Director;
 import invaders.builder.EnemyBuilder;
@@ -37,8 +37,8 @@ public class GameEngine implements Subject, Originator {
 	private int gameHeight;
 	private int timer = 45;
 	private List<Observer> observers = new ArrayList<>();
-	private CareTakerImp clockCareTaker = new CareTakerImp();
-	private CareTakerImp scoreCareTaker = new CareTakerImp();
+	private CareTaker clockCareTaker = new CareTakerImp();
+	private CareTaker scoreCareTaker = new CareTakerImp();
 
 	public GameEngine(String config){
 		load(config);
@@ -292,7 +292,7 @@ public class GameEngine implements Subject, Originator {
 	 * @return a memento object that contains saved data.
 	 */
 	@Override
-	public GameEngineMemento saveState() {
+	public Memento saveState() {
 		if (player.isAlive()) {
 			// Copy player
 			Player player = this.getPlayer().clone();
@@ -387,14 +387,6 @@ public class GameEngine implements Subject, Originator {
 		}
 	}
 
-	public boolean isLeft() {
-		return left;
-	}
-
-	public boolean isRight() {
-		return right;
-	}
-
 	public int getTimer() {
 		return timer;
 	}
@@ -429,11 +421,11 @@ public class GameEngine implements Subject, Originator {
 		return null;
 	}
 
-	public CareTakerImp getClockCareTaker() {
+	public CareTaker getClockCareTaker() {
 		return clockCareTaker;
 	}
 
-	public CareTakerImp getScoreCareTaker() {
+	public CareTaker getScoreCareTaker() {
 		return scoreCareTaker;
 	}
 
